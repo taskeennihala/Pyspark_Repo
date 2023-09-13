@@ -45,7 +45,6 @@ df = changing_data_type(df,'salary','string')
 df = new_column(df,'newsalary','salary','2000')
 #df.show()
 
-
 #Filter the name column whose salary in maximum.
 df = changing_data_type(df,'salary','integer')
 df = max_salary(df,'salary')
