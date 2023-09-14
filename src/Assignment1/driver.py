@@ -54,6 +54,6 @@ df = droping_column(df,'department')
 df = droping_column(df,'age')
 #df.show()
 #List out distinct value of dob and salary
-df1=duplicate(df,column=('dob'))
-df2=duplicate(df,column=('salary'))
+# df1=duplicate(df,column=('dob'))
+# df2=duplicate(df,column=('salary'))
 
