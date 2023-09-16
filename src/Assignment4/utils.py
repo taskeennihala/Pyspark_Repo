@@ -21,3 +21,18 @@ def trim_str(df,ColName2):
 def replace_null(df,colName):
      values = df.na.fill(" ", subset=[colName])
      return values
+
+#question2
+
+def rename_column(df,existingName,newName):
+    rename = df.withColumn(existingName,newName)
+    return rename
+
+def format_unix(df,colName1):
+    timestamp_format = "yyy-MM-dd'T'HH:mm:ss.SSSXXX"
+    timestampp = df.withColumn('timestamp_format',unix_timestamp(df[colName1],timestamp_format).cast(DoubleType()))
+    return timestampp
+
+def join_table(df,df2,colName,colName1):
+    joining = df.join(df2,df[colName]==df2[colName1],"outer")
+    return joining
