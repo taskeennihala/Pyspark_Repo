@@ -1,55 +1,31 @@
-from pyspark.sql import  Window
+import pyspark
+from pyspark.sql import *
 from pyspark.sql.types import *
 from pyspark.sql.functions import *
 
+def create_SparkSession():
+    spark=SparkSession.builder.appName('Assignment3').getOrCreate()
+    return spark
+def create_dataframe(spark,data1,schema1):
+    df=spark.createDataFrame(data1,schema1)
+    return df
+def first_row(df):
+    window1=Window.partitionBy("Department").orderBy("Salary")
+    df1=df.withColumn("row",row_number().over(window1)).filter(col("row")==1).drop("row")
+    return df1
 
-def dept_grp(employee_df):
-    partitioned_dept = Window.partitionBy("department").orderBy("employee_name")
-    row_number_added = employee_df.withColumn("row_number", row_number().over(partitioned_dept))
-    first_row = row_number_added.filter(row_number_added.row_number == 1).drop("row_number")
-    return first_row
+def highest_salary(df):
+    window1=Window.partitionBy("department").orderBy(col("salary").desc())
+    df2=df.withColumn("row",row_number().over(window1)).filter(col("row")==1).drop("row")
+    return df2
 
-
-def row_data(spark):
-    schema_emp = StructType([StructField("name", StringType(), True),
-                             StructField("age", IntegerType(), True),
-                             StructField("Job", StringType(), True)
-                             ])
-    row = ("Lishma", 22, "IT")
-    employee_data = [("Nancy", 21, "HR"),
-                     ("Clara", 23, "Admin")]
-
-    added_data = [row] + employee_data
-
-    new_df = spark.createDataFrame(data=added_data, schema=schema_emp)
-    return new_df
-
-
-def highest_salary(employee_df):
-    highest_salary = Window.partitionBy("department").orderBy(col("salary").desc())
-    row_number_added = employee_df.withColumn("row_number", row_number().over(highest_salary))
-    filtered_df = row_number_added.filter(col("row_number") == 1).drop("row_number")
-    return filtered_df
-
-
-def multi_action(employee_df):
-    # hightest salary
-    high_salary = Window.partitionBy("department").orderBy(col("salary").desc())
-    row_number_add1 = employee_df.withColumn("row_number", row_number().over(high_salary))
-    high_df = row_number_add1.filter(col("row_number") == 1).drop("row_number")
-
-    # lowest salary
-    low_salary = Window.partitionBy("department").orderBy(col("salary").asc())
-    row_number_add2 = employee_df.withColumn("row_number", row_number().over(low_salary))
-    low_df = row_number_add2.filter(col("row_number") == 1).drop("row_number")
-    low_df.show()
-
-    # average salary
-    avg_salary = employee_df.groupBy("department").agg(avg("salary"))
-    avg_salary.show()
-
-
-    # total salary for each department
-    tot_salary = employee_df.groupBy("department").agg(sum("salary"))
-    tot_salary.show()
-    return high_df
+def totalsal_avg_high_low(df):
+    window2=Window.partitionBy("department").orderBy("salary")
+    real_data=Window.partitionBy("department")
+    df3=df.withColumn("row",row_number().over(window2))\
+            .withColumn("Average",avg(col("salary")).over(real_data))\
+            .withColumn("highest_salary",max(col("salary")).over(real_data))\
+            .withColumn("lowest_salary",min(col("salary")).over(real_data))\
+            .withColumn("total_salary",sum(col("salary")).over(real_data))\
+            .where(col("row")==1).drop("row").select("department","Average","highest_salary","lowest_salary","total_salary")
+    return df3
